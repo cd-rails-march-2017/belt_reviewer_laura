@@ -1,0 +1,105 @@
+<h1>Events</h1>
+
+<h2>Welcome, <%=@user.first_name%>!</h2>
+
+<a href="/users/<%=@user.id%>/edit">Edit My Profile</a>
+<a href="/users/logout">Logout</a>
+
+<% if flash[:notice] %>
+  <%= flash[:notice] %>
+<% end %>
+
+<h2>Events Near You!</h2>
+<table>
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Date</td>
+      <td>Location</td>
+      <td>Host</td>
+      <td>Action/Status</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @events.each do |event| %>
+    <tr>
+      <td><a href='/events/<%= event.id %>'><%= event.name %></a></td>
+      <td><%= event.date %></td>
+      <td><%= event.city %>, <%= event.state %></td>
+      <td><%= event.host.first_name %></td>
+      <td>
+        <% if @user_id == event.host_id %>
+          <a href="/events/<%=event.id%>/edit">Edit</a> <a href="events/<%= event.id%>" data-method="delete" rel="nofollow">Delete</a>
+          <% else %>
+            <% if Attendee.exists?(event_id:event.id, user_id:@user_id)%>
+                Joined...  <a href="attendees/<%= event.id%>/delete" data-method="delete" rel="nofollow">Cancel</a>
+            <% else %>
+              <a href="/attendees/<%=event.id%>">Join</a>
+            <% end %>
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>Other Events!</h2>
+<table>
+  <thead>
+    <tr>
+      <td>Name</td>
+      <td>Date</td>
+      <td>Location</td>
+      <td>Host</td>
+      <td>Action/Status</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @otherevents.each do |event| %>
+    <tr>
+      <td><a href="/events/<%= event.id %>"><%= event.name %></a></td>
+      <td><%= event.date %></td>
+      <td><%= event.city %>, <%= event.state %></td>
+      <td><%= event.host.first_name %></td>
+      <td>
+        <% if @user_id == event.host_id %>
+          <a href="/events/<%=event.id%>/edit">Edit</a> <a href="events/<%= event.id%>" data-method="delete" rel="nofollow">Delete</a>
+          <% else %>
+            <% if Attendee.exists?(event_id:event.id, user_id:@user_id)%>
+                Joined...  <a href="attendees/<%= event.id%>/delete" data-method="delete" rel="nofollow">Cancel</a>
+            <% else %>
+              <a href="/attendees/<%=event.id%>">Join</a>
+            <% end %>
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if flash[:errors] %>
+  <% flash[:errors].each do |e| %>
+    <p><%= e %></p>
+  <% end %>
+<% end %>
+
+<h2>Add Event</h2>
+<form action="/events" method="post">
+  <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+  <label>Name:</label><br>
+  <input type="text" name="event[name]" placeholder="name"><br>
+  <label>Date:</label><br>
+  <input type="date" name="event[date]"><br>
+  <label>City:</label><br>
+  <input type="text" name="event[city]" placeholder="city"><br>
+  <label>State:</label><br>
+  <select name="event[state]">
+    <option value="OH">OH</option>
+    <option value="IL">IL</option>
+    <option value="IN">IN</option>
+    <option value="KY">KY</option>
+    <option value="MI">MI</option>
+  </select><br>
+  <input type="hidden" name="event[host_id]" value="<%=@user_id%>">
+  <input type="submit" value="Create Event">
+</form>
